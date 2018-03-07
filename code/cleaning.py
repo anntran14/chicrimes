@@ -94,6 +94,6 @@ def cleaning (filename, remove_list, newfile):
 remove_list = {"Primary Type", "Description", "Year", "Location", "X Coordinate", "Y Coordinate", "Latitude", "Longitude"}
 
 #cleaning("Crimes_-_2002.csv", remove_list, "2002_cleaned.csv")
-cleaning("Crimes_-_2002_slice.csv", remove_list, "2002_slice_cleaned.csv")
+cleaning("Crimes_-_2003.csv", remove_list, "2003_cleaned.csv")
 
 

@@ -3,7 +3,7 @@ import pandas as pd
 import csv
 import io
 
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.naive_bayes import GaussianNB, MultinomialNB
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
@@ -11,8 +11,11 @@ from sklearn import datasets
 from sklearn import preprocessing
 from sklearn import tree
 
-_FILEPATH = "../data/2002_violent_slice_cleaned.csv"
-_POSTCLEANEDPATH = "../data/2002_violent_slice_postcleaned.csv"
+_FILEPATH = "../data/2003_violent_cleaned.csv"
+_POSTCLEANEDPATH = "../data/2003_violent_postcleaned.csv"
+
+_FILEPATH_test = "../data/2004_violent_cleaned.csv"
+_POSTCLEANEDPATH_test = "../data/2004_violent_postcleaned.csv"
 
 def get_headers(filename):
     with open(filename) as f:
@@ -57,6 +60,7 @@ def post_cleaning(dict_list, headers, filename):
 		f_csv.writerows(dict_list)
 
 def main():
+	#2002
 	dict_list = get_data_list_of_dicts(_FILEPATH)
 	headers = get_headers(_FILEPATH)
 	(dict_list, encoders) = handle_categorical(dict_list, ['Block', 'Location Description'])
@@ -64,21 +68,32 @@ def main():
 
 	data = pd.read_csv(_POSTCLEANEDPATH)
 	data = data.fillna(0)
-	#print data.describe()
-	
+
 	headers.remove("Violent")
-	X_train, X_test, y_train, y_test = split_dataset(data, 0.75, headers, ["Violent"])
+	X_train, X_test, y_train, y_test = split_dataset(data, 0.25, headers, ["Violent"])
 
 	print "X_train Shape: ", X_train.shape
 	print "y_train Shape: ", y_train.shape
 	print "X_test Shape: ", X_test.shape
 	print "y_test Shape: ", y_test.shape
 
-	mnb = MultinomialNB()
+	mnb = GaussianNB()
 	mnb.fit(X_train, y_train)
 	print("Trained model: ", mnb)
-	predictions = mnb.predict(X_test)
 
+	#2003
+	dict_list_test = get_data_list_of_dicts(_FILEPATH_test)
+	headers_test = get_headers(_FILEPATH_test)
+	(dict_list_test, encoders_test) = handle_categorical(dict_list_test, ['Block', 'Location Description'])
+	post_cleaning(dict_list_test, headers_test, _POSTCLEANEDPATH_test)
+
+	data_test = pd.read_csv(_POSTCLEANEDPATH_test)
+	data_test = data_test.fillna(0)
+
+	headers_test.remove("Violent")
+	X_train, X_test, y_train, y_test = split_dataset(data_test, 0.25, headers_test, ["Violent"])
+
+	predictions = mnb.predict(X_test)
 
 	cnf_matrix_mnb = confusion_matrix(y_test, predictions)
 	print(cnf_matrix_mnb)
